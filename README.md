@@ -17,6 +17,9 @@ Jellyfin RPC updates your Discord status with what you're watching or listening 
     pip install git+https://github.com/kennethsible/jellyfin-rpc.git
     ```
 
+> [!NOTE]
+> On Linux, you can use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) to automatically create a desktop shortcut and place Jellyfin RPC into your system's application launcher.
+
 ## Configuration
 
 The Jellyfin host can be either a public or a local URL for your server. However, with a local URL, posters and album covers won't be retrievable from your Jellyfin server. In that case, you will need to rely on public metadata providers (see below for details). After entering your Jellyfin host, click "Connect" and use [Quick Connect](https://jellyfin.org/docs/general/server/quick-connect/) to authenticate with a user access token. To generate an API key instead of Quick Connect, go to the server dashboard and select "API Keys" under "Advanced."
