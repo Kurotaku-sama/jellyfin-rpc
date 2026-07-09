@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import hashlib
 import logging
+import os
 import platform
 import re
 import ssl
@@ -51,6 +52,11 @@ def load_config(ini_path: str) -> SectionProxy:
 def parse_delimited_list(config: SectionProxy, option: str) -> list[str]:
     option_split = re.split(r'[,;|]', config.get(option, ''))
     return [x.strip() for x in option_split if x.strip()]
+
+
+def get_valid_level(level_str: str, default: int) -> int:
+    level_mapping = logging.getLevelNamesMapping()
+    return level_mapping.get(level_str.upper().strip(), default)
 
 
 def get_lang_code(lang_str: str) -> str | None:
@@ -959,14 +965,19 @@ def start_discord_rpc(
     polling_rate = max(1, config.getint('POLLING_RATE') or config.getint('REFRESH_RATE', 5))
     seek_threshold = max(1, config.getint('SEEK_THRESHOLD', 10))
 
-    log_level = config.get('LOG_LEVEL', 'INFO').upper()
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s')
     logger.setLevel(logging.DEBUG)
+    log_level = get_valid_level(config.get('LOG_LEVEL', ''), logging.INFO)
+    file_hdlr_level = get_valid_level(config.get('FILE_HDLR_LEVEL', ''), logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s')
 
     if log_path is not None:
-        file_hdlr = logging.FileHandler(log_path, encoding='utf-8')
+        max_bytes = int(config.get('LOG_MAX_BYTES', 5242880))
+        max_files = int(config.get('LOG_MAX_FILES', 3))
+        file_hdlr = handlers.RotatingFileHandler(
+            log_path, maxBytes=max_bytes, backupCount=max_files, encoding='utf-8'
+        )
         file_hdlr.setFormatter(formatter)
-        file_hdlr.setLevel(logging.DEBUG)
+        file_hdlr.setLevel(file_hdlr_level)
         logger.addHandler(file_hdlr)
 
     stream_hdlr = logging.StreamHandler(sys.stdout)
@@ -984,11 +995,28 @@ def start_discord_rpc(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ini-path', type=str, required=True)
+    parser.add_argument('--ini-path', type=str)
     parser.add_argument('--log-path', type=str)
     args = parser.parse_args()
 
-    start_discord_rpc(args.ini_path, args.log_path)
+    ini_path, log_path = args.ini_path, args.log_path
+    if ini_path is None or log_path is None:
+        if sys.platform == 'win32':
+            root_dir = os.getenv('APPDATA') or os.path.expanduser('~\\AppData\\Roaming')
+            data_dir = os.path.join(root_dir, 'Jellyfin RPC')
+        elif sys.platform == 'darwin':
+            root_dir = os.path.expanduser('~/Library/Application Support')
+            data_dir = os.path.join(root_dir, 'Jellyfin RPC')
+        else:
+            root_dir = os.getenv('XDG_CONFIG_HOME') or os.path.expanduser('~/.config')
+            data_dir = os.path.join(root_dir, 'jellyfin-rpc')
+
+        if ini_path is None:
+            ini_path = os.path.join(data_dir, 'jellyfin_rpc.ini')
+        if log_path is None:
+            log_path = os.path.join(data_dir, 'jellyfin_rpc.log')
+
+    start_discord_rpc(ini_path, log_path)
 
 
 if __name__ == '__main__':

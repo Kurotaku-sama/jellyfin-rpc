@@ -22,7 +22,13 @@ from PIL import Image
 from requests.exceptions import RequestException
 
 from jellyfin_rpc import __version__, start_discord_rpc
-from jellyfin_rpc.main import build_auth_header, get_device_id, load_config, parse_delimited_list
+from jellyfin_rpc.main import (
+    build_auth_header,
+    get_device_id,
+    get_valid_level,
+    load_config,
+    parse_delimited_list,
+)
 
 button_connect_text = ''
 logger = logging.getLogger('GUI')
@@ -913,7 +919,7 @@ def main() -> None:
             )
 
     def set_log_level(level: str) -> None:
-        logger.setLevel(level)
+        logger.setLevel(get_valid_level(level, logging.INFO))
         on_click(
             cast(ctk.CTkButton, context['button_connect']),
             entries,
