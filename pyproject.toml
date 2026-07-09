@@ -13,14 +13,14 @@ dependencies = [
     "certifi>=2026.6.17",
     "langcodes>=3.5.1",
     "language_data>=1.4.0",
-    "pypresence@git+https://github.com/qwertyquerty/pypresence",
+    "pypresence>=4.6.2",
 ]
 
 [project.optional-dependencies]
 gui = ["customtkinter>=6.0.0", "pystray>=0.19.5", "pyinstaller>=6.21.0"]
 
 [dependency-groups]
-dev = ["ruff>=0.15.20", "mypy>=2.1.0", "types-requests"]
+dev = ["ruff>=0.15.21", "mypy>=2.2.0", "types-requests"]
 
 [project.urls]
 homepage = "https://github.com/kennethsible/jellyfin-rpc"
@@ -46,5 +46,5 @@ untyped_calls_exclude = ["pypresence"]
 allow-direct-references = true
 
 [build-system]
-requires = ["hatchling>=1.30.1"]
+requires = ["hatchling>=1.31.0"]
 build-backend = "hatchling.build"
