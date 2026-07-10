@@ -133,7 +133,7 @@ class LibrarySelectorWindow(ctk.CTkToplevel):
         var_filter_libraries: ctk.StringVar,
     ):
         super().__init__(master)
-        self.title('Jellyfin RPC')
+        self.title(f'Jellyfin RPC v{__version__}')
         self.geometry('220x350')
         self.transient(master)
         self.wait_visibility()
@@ -544,7 +544,7 @@ def main() -> None:
     ctk.set_appearance_mode(appearance_mode)
 
     root = ctk.CTk(className='jellyfin-rpc')
-    root.title('Jellyfin RPC')
+    root.title(f'Jellyfin RPC v{__version__}')
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
 
@@ -626,7 +626,7 @@ def main() -> None:
         variable=var_filter_mode,
         command=lambda value: change_filter_mode(value),
     )
-    segmented_filter_mode.pack(pady=(10, 5), padx=10, fill='x')
+    segmented_filter_mode.pack(pady=(10, 0), padx=10, fill='x')
     var_filter_libraries = ctk.StringVar(value=filter_libraries)
 
     def select_libraries() -> None:
